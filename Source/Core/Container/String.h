@@ -1,13 +1,20 @@
 ﻿#pragma once
 
-#define _TCHAR_DEFINED
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
 #include <string>
 #include "ContainerAllocator.h"
 #include "Core/HAL/PlatformType.h"
 
+/*
+# TCHAR가 ANSICHAR인 경우
+1. const ANSICHAR* 로 FString 생성
+2. std::string에서 FString 생성
+
+# TCHAR가 WIDECHAR인 경우
+1. const ANSICHAR* 로 FString 생성
+1. const WIDECHAR* 로 FString 생성
+2. std::wstring에서 FString 생성
+3. std::string에서 FString 생성
+*/
 
 class FString
 {
@@ -25,18 +32,16 @@ public:
 
 #if IS_WIDECHAR
 private:
-    static std::wstring ConvertWideChar(const ANSICHAR*NarrowStr);
-
-    FString(const std::wstring& InString) : PrivateString(InString) {}
-    FString(const std::string& InString) : PrivateString(ConvertWideChar(InString.c_str())) {}
+    static std::wstring ConvertWideChar(const ANSICHAR* NarrowStr);
 
 public:
+    FString(const std::wstring& InString) : PrivateString(InString) {}
+    FString(const std::string& InString) : PrivateString(ConvertWideChar(InString.c_str())) {}
     FString(const WIDECHAR* InString) : PrivateString(InString) {}
     FString(const ANSICHAR* InString) : PrivateString(ConvertWideChar(InString)) {}
 #else
-private:
-    FString(const std::string& InString) : PrivateString(InString) {}
 public:
+    FString(const std::string& InString) : PrivateString(InString) {}
     FString(const ANSICHAR* InString) : PrivateString(InString) {}
 #endif
 
